@@ -4,6 +4,7 @@ services:
       dockerfile: Dockerfile.paper
       context: build_image
       args:
+	# Find the values from: https://papermc.io/downloads/paper
         version: 1.20.6
         build: 137
     container_name: minecraft_paper
