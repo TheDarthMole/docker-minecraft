@@ -1,0 +1,40 @@
+# Bukkit for Docker
+#     Copyright (C) 2015 Bren Briggs
+
+#     This program is free software; you can redistribute it and/or modify
+#     it under the terms of the GNU General Public License as published by
+#     the Free Software Foundation; either version 2 of the License, or
+#     (at your option) any later version.
+
+#     This program is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU General Public License for more details.
+
+#     You should have received a copy of the GNU General Public License along
+#     with this program; if not, write to the Free Software Foundation, Inc.,
+#     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ARG JAVA_VER=21
+FROM amazoncorretto:${JAVA_VER}-alpine-jdk
+
+ENV InitRam=2g
+ENV MaxRAM=10g
+
+ARG version
+ARG build
+RUN apk update && \
+    apk add --no-cache python3 py3-pip bash wget netcat-openbsd && \
+    apk upgrade && \
+    if [ ! -e /usr/bin/pip ]; then ln -s pip3 /usr/bin/pip ; fi && \
+    if [[ ! -e /usr/bin/python ]]; then ln -sf /usr/bin/python3 /usr/bin/python; fi && \
+    mkdir -p /opt/minecraft && \
+    echo "VERSION: ${version}" && \
+       wget "https://api.papermc.io/v2/projects/paper/versions/${version}/builds/${build}/downloads/paper-${version}-${build}.jar" -O /opt/minecraft/papermc.jar
+EXPOSE 25565
+WORKDIR /data
+COPY entrypoint.sh /opt/minecraft/entrypoint.sh
+COPY configure.py /opt/minecraft/configure.py
+HEALTHCHECK --interval=1m --timeout=10s \
+  CMD nc -z localhost 25565 || exit 1
+ENTRYPOINT ["/opt/minecraft/entrypoint.sh"]
+CMD ["papermc"]
