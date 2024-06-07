@@ -8,10 +8,10 @@ services:
         version: 1.20.6
         build: 137
     container_name: minecraft_paper
-    env_file:
-      - env.list
     environment:
       EULA: "true"
+      InitRAM: "3g"
+      MaxRAM: "10g"
     ports:
       - "25565:25565"
     volumes:
